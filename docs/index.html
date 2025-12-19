@@ -188,8 +188,8 @@
     </div>
 
     <script>
-        /* [Same JavaScript Logic as your original file stays here] */
-        const API_URL = 'http://localhost:8080/calculate';
+        
+        
         let currentExpression = '';
         let lastResult = '';
 
@@ -241,28 +241,7 @@
             clearStatus();
         }
 
-        async function calculate() {
-            if (!currentExpression) return;
-            try {
-                setStatus('Processing...', 'success');
-                const response = await fetch(API_URL, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ expression: currentExpression })
-                });
-                const data = await response.json();
-                if (data.success) {
-                    lastResult = data.result.toString();
-                    currentExpression = '';
-                    updateDisplay();
-                    setStatus('✓ Done', 'success');
-                } else {
-                    setStatus('Error: ' + data.error, 'error');
-                }
-            } catch (error) {
-                setStatus('Server Offline', 'error');
-            }
-        }
+       
 
         function setStatus(m, t) {
             const s = document.getElementById('status');
