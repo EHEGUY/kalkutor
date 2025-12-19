@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Smart Calculator Pro - Dark Edition</title>
+    <style>
+        :root {
+            --bg-dark: #0f172a;
+            --accent-blue: #0ea5e9;
+            --accent-glow: rgba(14, 165, 233, 0.4);
+            --card-bg: rgba(30, 41, 59, 0.7);
+            --btn-num: #334155;
+            --btn-op: #1e293b;
+            --text-main: #f8fafc;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: radial-gradient(circle at center, #1e293b 0%, #020617 100%);
+            color: var(--text-main);
+            padding: 20px;
+        }
+
+        .container {
+            background: var(--card-bg);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 24px;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+            padding: 25px;
+            width: 100%;
+            max-width: 380px;
+            animation: fadeIn 0.6s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: scale(0.95); }
+            to { opacity: 1; transform: scale(1); }
+        }
+
+        h1 {
+            text-align: center;
+            font-size: 22px;
+            letter-spacing: 1px;
+            margin-bottom: 5px;
+            color: var(--accent-blue);
+        }
+
+        .subtitle {
+            text-align: center;
+            color: #94a3b8;
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            margin-bottom: 25px;
+        }
+
+        .display {
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 16px;
+            padding: 20px;
+            margin-bottom: 25px;
+            text-align: right;
+            border-bottom: 2px solid var(--accent-blue);
+            box-shadow: inset 0 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .expression {
+            font-size: 14px;
+            color: #64748b;
+            min-height: 20px;
+            margin-bottom: 8px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .result {
+            font-size: 36px;
+            font-weight: 700;
+            color: var(--accent-blue);
+            text-shadow: 0 0 15px var(--accent-glow);
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 12px;
+        }
+
+        button {
+            border: none;
+            border-radius: 14px;
+            padding: 18px;
+            font-size: 18px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            color: var(--text-main);
+            background: var(--btn-num);
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            filter: brightness(1.2);
+        }
+
+        button:active {
+            transform: translateY(1px);
+        }
+
+        .btn-op {
+            background: var(--btn-op);
+            color: var(--accent-blue);
+        }
+
+        .btn-clear {
+            color: #ef4444;
+            background: rgba(239, 68, 68, 0.1);
+        }
+
+        .btn-equal {
+            grid-column: span 2;
+            background: var(--accent-blue);
+            color: #ffffff;
+            box-shadow: 0 4px 15px var(--accent-glow);
+        }
+
+        .status {
+            margin-top: 20px;
+            text-align: center;
+            font-size: 12px;
+            height: 15px;
+            color: #94a3b8;
+        }
+
+        .error { color: #f87171; }
+        .success { color: var(--accent-blue); }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>SMART CALC</h1>
+        <p class="subtitle">Nexus Edition</p>
+        
+        <div class="display">
+            <div class="expression" id="expression"></div>
+            <div class="result" id="result">0</div>
+        </div>
+
+        <div class="grid">
+            <button class="btn-clear" onclick="clearAll()">AC</button>
+            <button class="btn-op" onclick="backspace()">⌫</button>
+            <button class="btn-op" onclick="appendOperator('%')">%</button>
+            <button class="btn-op" onclick="appendOperator('/')">÷</button>
+
+            <button onclick="appendNumber('7')">7</button>
+            <button onclick="appendNumber('8')">8</button>
+            <button onclick="appendNumber('9')">9</button>
+            <button class="btn-op" onclick="appendOperator('*')">×</button>
+
+            <button onclick="appendNumber('4')">4</button>
+            <button onclick="appendNumber('5')">5</button>
+            <button onclick="appendNumber('6')">6</button>
+            <button class="btn-op" onclick="appendOperator('-')">−</button>
+
+            <button onclick="appendNumber('1')">1</button>
+            <button onclick="appendNumber('2')">2</button>
+            <button onclick="appendNumber('3')">3</button>
+            <button class="btn-op" onclick="appendOperator('+')">+</button>
+
+            <button onclick="appendNumber('0')">0</button>
+            <button onclick="appendDecimal()">.</button>
+            <button class="btn-equal" onclick="calculate()">=</button>
+        </div>
+
+        <div class="status" id="status"></div>
+    </div>
+
+    <script>
+        /* [Same JavaScript Logic as your original file stays here] */
+        const API_URL = 'http://localhost:8080/calculate';
+        let currentExpression = '';
+        let lastResult = '';
+
+        function updateDisplay() {
+            document.getElementById('expression').textContent = currentExpression || '';
+            document.getElementById('result').textContent = lastResult || '0';
+        }
+
+        function appendNumber(num) {
+            currentExpression += num;
+            updateDisplay();
+            clearStatus();
+        }
+
+        function appendOperator(op) {
+            if (currentExpression && !isLastCharOperator()) {
+                currentExpression += ' ' + op + ' ';
+                updateDisplay();
+            }
+            clearStatus();
+        }
+
+        function appendDecimal() {
+            const parts = currentExpression.split(/[\+\-\*\/\%\^]/);
+            const lastPart = parts[parts.length - 1].trim();
+            if (!lastPart.includes('.')) {
+                currentExpression += lastPart === '' ? '0.' : '.';
+                updateDisplay();
+            }
+            clearStatus();
+        }
+
+        function isLastCharOperator() {
+            const trimmed = currentExpression.trim();
+            const lastChar = trimmed[trimmed.length - 1];
+            return ['+', '-', '*', '/', '%'].includes(lastChar);
+        }
+
+        function clearAll() {
+            currentExpression = '';
+            lastResult = '';
+            updateDisplay();
+            clearStatus();
+        }
+
+        function backspace() {
+            currentExpression = currentExpression.trim().slice(0, -1);
+            updateDisplay();
+            clearStatus();
+        }
+
+        async function calculate() {
+            if (!currentExpression) return;
+            try {
+                setStatus('Processing...', 'success');
+                const response = await fetch(API_URL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ expression: currentExpression })
+                });
+                const data = await response.json();
+                if (data.success) {
+                    lastResult = data.result.toString();
+                    currentExpression = '';
+                    updateDisplay();
+                    setStatus('✓ Done', 'success');
+                } else {
+                    setStatus('Error: ' + data.error, 'error');
+                }
+            } catch (error) {
+                setStatus('Server Offline', 'error');
+            }
+        }
+
+        function setStatus(m, t) {
+            const s = document.getElementById('status');
+            s.textContent = m;
+            s.className = 'status ' + t;
+        }
+
+        function clearStatus() {
+            document.getElementById('status').textContent = '';
+        }
+
+        document.addEventListener('keydown', (e) => {
+            if (e.key >= '0' && e.key <= '9') appendNumber(e.key);
+            else if (e.key === '.') appendDecimal();
+            else if (['+', '-', '*', '/'].includes(e.key)) appendOperator(e.key);
+            else if (e.key === 'Enter') calculate();
+            else if (e.key === 'Backspace') backspace();
+        });
+    </script>
+</body>
+</html>
