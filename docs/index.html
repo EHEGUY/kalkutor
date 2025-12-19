@@ -188,78 +188,92 @@
     </div>
 
     <script>
-        
-        
-        let currentExpression = '';
-        let lastResult = '';
+let currentExpression = '';
+let lastResult = '';
 
-        function updateDisplay() {
-            document.getElementById('expression').textContent = currentExpression || '';
-            document.getElementById('result').textContent = lastResult || '0';
-        }
+function updateDisplay() {
+    document.getElementById('expression').textContent = currentExpression || '';
+    document.getElementById('result').textContent = lastResult || '0';
+}
 
-        function appendNumber(num) {
-            currentExpression += num;
-            updateDisplay();
-            clearStatus();
-        }
+function appendNumber(num) {
+    currentExpression += num;
+    updateDisplay();
+    clearStatus();
+}
 
-        function appendOperator(op) {
-            if (currentExpression && !isLastCharOperator()) {
-                currentExpression += ' ' + op + ' ';
-                updateDisplay();
-            }
-            clearStatus();
-        }
+function appendOperator(op) {
+    if (currentExpression && !isLastCharOperator()) {
+        currentExpression += op;
+        updateDisplay();
+    }
+    clearStatus();
+}
 
-        function appendDecimal() {
-            const parts = currentExpression.split(/[\+\-\*\/\%\^]/);
-            const lastPart = parts[parts.length - 1].trim();
-            if (!lastPart.includes('.')) {
-                currentExpression += lastPart === '' ? '0.' : '.';
-                updateDisplay();
-            }
-            clearStatus();
-        }
+function appendDecimal() {
+    const parts = currentExpression.split(/[\+\-\*\/\%]/);
+    const lastPart = parts[parts.length - 1];
+    if (!lastPart.includes('.')) {
+        currentExpression += lastPart === '' ? '0.' : '.';
+        updateDisplay();
+    }
+    clearStatus();
+}
 
-        function isLastCharOperator() {
-            const trimmed = currentExpression.trim();
-            const lastChar = trimmed[trimmed.length - 1];
-            return ['+', '-', '*', '/', '%'].includes(lastChar);
-        }
+function isLastCharOperator() {
+    const trimmed = currentExpression.trim();
+    const lastChar = trimmed[trimmed.length - 1];
+    return ['+', '-', '*', '/', '%'].includes(lastChar);
+}
 
-        function clearAll() {
-            currentExpression = '';
-            lastResult = '';
-            updateDisplay();
-            clearStatus();
-        }
+function clearAll() {
+    currentExpression = '';
+    lastResult = '';
+    updateDisplay();
+    clearStatus();
+}
 
-        function backspace() {
-            currentExpression = currentExpression.trim().slice(0, -1);
-            updateDisplay();
-            clearStatus();
-        }
+function backspace() {
+    currentExpression = currentExpression.slice(0, -1);
+    updateDisplay();
+    clearStatus();
+}
 
-       
+function calculate() {
+    if (!currentExpression) return;
+    try {
+        // Replace display symbols with JS operators
+        let expr = currentExpression.replace(/×/g, '*').replace(/÷/g, '/');
 
-        function setStatus(m, t) {
-            const s = document.getElementById('status');
-            s.textContent = m;
-            s.className = 'status ' + t;
-        }
+        // Handle %: convert "50%" to "50/100"
+        expr = expr.replace(/(\d+)%/g, '($1/100)');
 
-        function clearStatus() {
-            document.getElementById('status').textContent = '';
-        }
+        // Evaluate expression
+        lastResult = eval(expr).toString();
+        currentExpression = '';
+        updateDisplay();
+        setStatus('✓ Done', 'success');
+    } catch (e) {
+        setStatus('Error', 'error');
+    }
+}
 
-        document.addEventListener('keydown', (e) => {
-            if (e.key >= '0' && e.key <= '9') appendNumber(e.key);
-            else if (e.key === '.') appendDecimal();
-            else if (['+', '-', '*', '/'].includes(e.key)) appendOperator(e.key);
-            else if (e.key === 'Enter') calculate();
-            else if (e.key === 'Backspace') backspace();
-        });
-    </script>
-</body>
-</html>
+function setStatus(msg, type) {
+    const s = document.getElementById('status');
+    s.textContent = msg;
+    s.className = 'status ' + type;
+}
+
+function clearStatus() {
+    document.getElementById('status').textContent = '';
+}
+
+// Keyboard support
+document.addEventListener('keydown', (e) => {
+    if (e.key >= '0' && e.key <= '9') appendNumber(e.key);
+    else if (e.key === '.') appendDecimal();
+    else if (['+', '-', '*', '/'].includes(e.key)) appendOperator(e.key);
+    else if (e.key === 'Enter') calculate();
+    else if (e.key === 'Backspace') backspace();
+});
+</script>
