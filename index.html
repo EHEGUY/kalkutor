@@ -166,12 +166,12 @@
         //const API_URL = 'http://localhost:8080/calculate';
     
 
-// Live version (Update this once you get your backend URL):
+// Live version 
 const API_URL = 'https://kalkutor.onrender.com/calculate';
 
 async function checkServer() {
     try {
-        // We use the health endpoint we talked about earlier
+        //the health endpoint
         const res = await fetch('https://kalkutor.onrender.com/health');
         if (res.ok) {
             document.getElementById('status').classList.add('online');
