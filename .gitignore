@@ -1,0 +1,15 @@
+# Compiled binaries (the "main" file created by go build)
+main
+main.exe
+calculator
+calculator.exe
+
+# Dependency directories (if you ever run 'go mod vendor')
+vendor/
+
+# Operating system files
+.DS_Store
+Thumbs.db
+
+# Environment variables (if you ever use a .env file for secrets)
+*.env
