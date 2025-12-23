@@ -1,143 +1,244 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Smart Calculator</title>
-<style>
-body {
-  font-family: Arial, sans-serif;
-  background: #0f172a;
-  color: #f8fafc;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  height: 100vh;
-  margin: 0;
-}
-.container {
-  background: rgba(30,41,59,0.8);
-  padding: 20px;
-  border-radius: 20px;
-  width: 300px;
-}
-h1 { text-align: center; color:#0ea5e9; }
-.display {
-  background: rgba(0,0,0,0.2);
-  border-radius: 10px;
-  padding: 10px;
-  margin-bottom: 15px;
-  text-align: right;
-}
-.display div { font-size: 24px; }
-.grid {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 10px;
-}
-button {
-  padding: 15px;
-  font-size: 18px;
-  border: none;
-  border-radius: 10px;
-  cursor: pointer;
-}
-.btn-op { background: #1e293b; color:#0ea5e9; }
-.btn-clear { background: #ef4444; color:#fff; }
-.btn-equal { background: #0ea5e9; color:#fff; grid-column: span 2; }
-button:hover { opacity: 0.8; }
-.status { text-align:center; margin-top:10px; font-size:12px; color:#94a3b8; }
-</style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Smart Calc | Premium Edition</title>
+    <style>
+        :root {
+            --apple-orange: #ff9f0a;
+            --apple-dark-gray: #333333;
+            --apple-light-gray: #a5a5a5;
+            --bg-gradient: radial-gradient(circle at center, #2c3e50 0%, #000000 100%);
+        }
+
+        body {
+            background: var(--bg-gradient);
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Helvetica Neue", sans-serif;
+            margin: 0;
+            overflow: hidden;
+        }
+
+        /* The Main Calculator Container */
+        .calc-box {
+            background: rgba(0, 0, 0, 0.9);
+            width: fit-content; 
+            padding: 30px;
+            border-radius: 45px;
+            border: 1px solid #333;
+            box-shadow: 0 50px 100px rgba(0,0,0,0.8);
+            backdrop-filter: blur(20px);
+            position: relative;
+        }
+
+        /* Display Area */
+        .display-area {
+            text-align: right;
+            padding: 10px;
+            height: 140px;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-end;
+            color: white;
+            max-width: 325px;
+        }
+
+        #expression-view {
+            color: #888;
+            font-size: 1.2rem;
+            min-height: 1.5rem;
+            margin-bottom: 5px;
+        }
+
+        #result-view {
+            font-size: 4.5rem;
+            font-weight: 200;
+            white-space: nowrap;
+            overflow: hidden;
+            transition: all 0.2s ease;
+        }
+
+        /* Button Grid */
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(4, 70px);
+            gap: 15px;
+        }
+
+        button {
+            height: 70px;
+            width: 70px;
+            border-radius: 50%;
+            border: none;
+            font-size: 1.7rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        /* Fixed Class Mismatches */
+        .btn-num { background: var(--apple-dark-gray); color: white; }
+        .btn-op { background: var(--apple-orange); color: white; font-size: 2.2rem; }
+        .btn-util { background: var(--apple-light-gray); color: black; font-weight: 500; }
+
+        button:hover { filter: brightness(1.2); }
+        button:active { transform: scale(0.92); }
+
+        .btn-zero {
+            grid-column: span 2;
+            width: 155px; /* 70 + 70 + 15 gap */
+            border-radius: 40px;
+            justify-content: flex-start;
+            padding-left: 28px;
+        }
+
+        /* Status & Credits */
+        .status-dot {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            width: 8px;
+            height: 8px;
+            background: #ff4444;
+            border-radius: 50%;
+            box-shadow: 0 0 5px #ff4444;
+        }
+        .online { background: #00ff88; box-shadow: 0 0 5px #00ff88; }
+
+        .credits {
+            margin-top: 30px;
+            color: rgba(255,255,255,0.3);
+            letter-spacing: 4px;
+            font-size: 0.7rem;
+            text-transform: uppercase;
+        }
+        .credits b { color: var(--apple-orange); }
+    </style>
 </head>
 <body>
-<div class="container">
-<h1>SMART CALC</h1>
-<div class="display">
-  <div id="expression"></div>
-  <div id="result">0</div>
-</div>
-<div class="grid">
-  <button class="btn-clear" onclick="clearAll()">AC</button>
-  <button class="btn-op" onclick="backspace()">⌫</button>
-  <button class="btn-op" onclick="appendOperator('%')">%</button>
-  <button class="btn-op" onclick="appendOperator('/')">/</button>
 
-  <button onclick="appendNumber('7')">7</button>
-  <button onclick="appendNumber('8')">8</button>
-  <button onclick="appendNumber('9')">9</button>
-  <button class="btn-op" onclick="appendOperator('*')">*</button>
+    <div class="calc-box">
+        <div id="status" class="status-dot"></div>
+        
+        <div class="display-area">
+            <div id="expression-view"></div>
+            <div id="result-view">0</div>
+        </div>
+        
+        <div class="grid">
+            <button class="btn-util" onclick="clearAll()">AC</button>
+            <button class="btn-util" onclick="backspace()">⌫</button>
+            <button class="btn-util" onclick="appendOperator('%')">%</button>
+            <button class="btn-op" onclick="appendOperator('/')">÷</button>
 
-  <button onclick="appendNumber('4')">4</button>
-  <button onclick="appendNumber('5')">5</button>
-  <button onclick="appendNumber('6')">6</button>
-  <button class="btn-op" onclick="appendOperator('-')">-</button>
+            <button class="btn-num" onclick="appendNumber('7')">7</button>
+            <button class="btn-num" onclick="appendNumber('8')">8</button>
+            <button class="btn-num" onclick="appendNumber('9')">9</button>
+            <button class="btn-op" onclick="appendOperator('*')">×</button>
 
-  <button onclick="appendNumber('1')">1</button>
-  <button onclick="appendNumber('2')">2</button>
-  <button onclick="appendNumber('3')">3</button>
-  <button class="btn-op" onclick="appendOperator('+')">+</button>
+            <button class="btn-num" onclick="appendNumber('4')">4</button>
+            <button class="btn-num" onclick="appendNumber('5')">5</button>
+            <button class="btn-num" onclick="appendNumber('6')">6</button>
+            <button class="btn-op" onclick="appendOperator('-')">−</button>
 
-  <button onclick="appendNumber('0')">0</button>
-  <button onclick="appendDecimal()">.</button>
-  <button class="btn-equal" onclick="calculate()">=</button>
-</div>
-<div class="status" id="status"></div>
-</div>
+            <button class="btn-num" onclick="appendNumber('1')">1</button>
+            <button class="btn-num" onclick="appendNumber('2')">2</button>
+            <button class="btn-num" onclick="appendNumber('3')">3</button>
+            <button class="btn-op" onclick="appendOperator('+')">+</button>
 
-<script>
-let currentExpression = '';
-let lastResult = '';
+            <button class="btn-num btn-zero" onclick="appendNumber('0')">0</button>
+            <button class="btn-num" onclick="appendDecimal()">.</button>
+            <button class="btn-op" onclick="calculate()">=</button>
+        </div>
+    </div>
 
-function updateDisplay(){
-    document.getElementById('expression').textContent = currentExpression || '';
-    document.getElementById('result').textContent = lastResult || '0';
-}
+    <div class="credits">~by <b>Siddhant</b></div>
 
-function appendNumber(num){ currentExpression += num; updateDisplay(); clearStatus(); }
-function appendOperator(op){ 
-    if(currentExpression && !isLastCharOperator()){ currentExpression += op; updateDisplay(); }
-    clearStatus();
-}
-function appendDecimal(){ 
-    const parts = currentExpression.split(/[\+\-\*\/\%]/); 
-    const lastPart = parts[parts.length-1]; 
-    if(!lastPart.includes('.')){ currentExpression += lastPart===''?'0.':'.'; updateDisplay(); }
-    clearStatus();
-}
-function isLastCharOperator(){ 
-    const last = currentExpression.slice(-1); 
-    return ['+','-','*','/','%'].includes(last); 
-}
-function clearAll(){ currentExpression=''; lastResult=''; updateDisplay(); clearStatus(); }
-function backspace(){ currentExpression = currentExpression.slice(0,-1); updateDisplay(); clearStatus(); }
+    <script>
+        let currentInput = '';
+        const API_URL = 'http://localhost:8080/calculate';
 
-function calculate(){
-    if(!currentExpression) return;
-    try{
-        let expr = currentExpression;
-        // Handle %
-        expr = expr.replace(/(\d+)%/g,'($1/100)');
-        lastResult = eval(expr).toString();
-        currentExpression = '';
-        updateDisplay();
-        setStatus('✓ Done','success');
-    }catch(e){ setStatus('Error','error'); }
-}
+        async function checkServer() {
+            try {
+                const res = await fetch('http://localhost:8080/health');
+                if (res.ok) document.getElementById('status').classList.add('online');
+            } catch (e) { console.log("Server Offline"); }
+        }
+        checkServer();
 
-function setStatus(msg,type){ 
-    const s=document.getElementById('status'); 
-    s.textContent=msg; 
-    s.className='status '+type; 
-}
-function clearStatus(){ document.getElementById('status').textContent=''; }
+        function updateUI(val) {
+            const resView = document.getElementById('result-view');
+            const expView = document.getElementById('expression-view');
+            
+            expView.textContent = currentInput;
+            resView.textContent = val || '0';
+            
+            // Auto-shrink font for long numbers
+            if (val.length > 6) {
+                resView.style.fontSize = "2.5rem";
+            } else {
+                resView.style.fontSize = "4.5rem";
+            }
+        }
 
-document.addEventListener('keydown',(e)=>{
-    if(e.key>='0' && e.key<='9') appendNumber(e.key);
-    else if(e.key=='.') appendDecimal();
-    else if(['+','-','*','/'].includes(e.key)) appendOperator(e.key);
-    else if(e.key==='Enter') calculate();
-    else if(e.key==='Backspace') backspace();
-});
-</script>
+        function appendNumber(num) {
+            currentInput += num;
+            updateUI(currentInput);
+        }
+
+        function appendOperator(op) {
+            if (currentInput !== '' && !['+','-','*','/','%'].includes(currentInput.slice(-1))) {
+                currentInput += op;
+                updateUI(currentInput);
+            }
+        }
+
+        function appendDecimal() {
+            const lastPart = currentInput.split(/[\+\-\*\/\%]/).pop();
+            if (!lastPart.includes('.')) {
+                currentInput += (lastPart === '' ? '0.' : '.');
+                updateUI(currentInput);
+            }
+        }
+
+        function clearAll() {
+            currentInput = '';
+            updateUI('0');
+        }
+
+        function backspace() {
+            currentInput = currentInput.slice(0, -1);
+            updateUI(currentInput || '0');
+        }
+
+        async function calculate() {
+            if (!currentInput) return;
+
+            try {
+                const response = await fetch(API_URL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ expression: currentInput })
+                });
+
+                const data = await response.json();
+                if (data.success) {
+                    currentInput = data.result.toString();
+                    updateUI(currentInput);
+                } else {
+                    alert("Error: " + data.description);
+                }
+            } catch (err) {
+                alert("Backend Offline! Ensure main.go is running.");
+            }
+        }
+    </script>
 </body>
 </html>
