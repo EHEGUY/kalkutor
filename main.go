@@ -49,7 +49,7 @@ func CalculateHandler(w http.ResponseWriter, r *http.Request) {
 	})
 }
 
-// evaluateExpression logic from your original code
+// evaluateExpression logic 
 func evaluateExpression(expr string) (float64, string, error) {
 	expr = strings.ReplaceAll(expr, "×", "*")
 	expr = strings.ReplaceAll(expr, "÷", "/")
@@ -78,7 +78,7 @@ func evaluateExpression(expr string) (float64, string, error) {
 	return 0, "", fmt.Errorf("invalid format")
 }
 
-// performOperation logic from your original code
+// performOperation logic
 func performOperation(num1, num2 float64, op string) (float64, string, error) {
 	switch op {
 	case "+":
@@ -103,6 +103,6 @@ func performOperation(num1, num2 float64, op string) (float64, string, error) {
 
 func main() {
 	http.HandleFunc("/calculate", CalculateHandler)
-	fmt.Println("🚀 Apple-Style Calc Server running at http://localhost:8080")
+	fmt.Println(" Apple-Style Calc Server running at http://localhost:8080")
 	log.Fatal(http.ListenAndServe(":8080", nil))
 }
